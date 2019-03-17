@@ -342,6 +342,32 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 	}
 }
 
+// iOS 12
+- (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating activationSettings:(id)activationSettings origin:(id)origin withResult:(id)resultHandler
+{
+     switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, origin, 0, activationSettings, resultHandler)) {
+    	case BCNoMappingApplied:
+    		return %orig();
+    	case BCMappedToUIElement:
+    		return;
+    	case BCMappedToNewApplication:
+    		suppressed++;
+    		shouldBreadcrumb++;
+    		if ([self respondsToSelector:@selector(applicationOpenURL:withApplication:animating:activationSettings:origin:withResult:)]) {
+    			[self applicationOpenURL:url withApplication:nil animating:YES activationSettings:activationSettings origin:origin withResult:nil];
+    		} else if ([self respondsToSelector:@selector(applicationOpenURL:publicURLsOnly:)]) {
+    			[self applicationOpenURL:url publicURLsOnly:NO];
+    		} else {
+    			[self openURL:url];
+    		}
+    		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 10), dispatch_get_main_queue(), ^{
+    			shouldBreadcrumb--;
+    		});
+    		suppressed--;
+    		return;
+    }
+}
+
 %end
 
 %hook SBMainDisplaySceneManager
