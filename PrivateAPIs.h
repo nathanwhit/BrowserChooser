@@ -54,6 +54,12 @@ extern UIApplication *UIApp;
 - (void)applicationOpenURL:(NSURL *)arg1 withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)publicOnly animating:(BOOL)animating needsPermission:(BOOL)needsPermission activationSettings:(id)activationSettings withResult:(id)resultHandler;
 @end
 
+@interface SpringBoard (iOS12)
+- (void)openURL:(NSURL *)url 
+        options:(NSDictionary<UIApplicationOpenExternalURLOptionsKey, id> *)options 
+completionHandler:(void (^)(BOOL success))completion;
+@end
+
 @interface SBApplication : NSObject
 - (NSString *)displayIdentifier;
 @end

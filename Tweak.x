@@ -174,6 +174,8 @@ __attribute__((visibility("hidden")))
 			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 10), dispatch_get_main_queue(), ^{
 				shouldBreadcrumb--;
 			});
+		} else if ([UIApp respondsToSelector: @selector(openURL:options:completionHandler:)]) {
+		    [UIApp openURL:adjustedURL options:@{} completionHandler:nil];
 		} else if ([UIApp respondsToSelector:@selector(applicationOpenURL:withApplication:sender:publicURLsOnly:animating:needsPermission:additionalActivationFlags:activationHandler:)]) {
 			[(SpringBoard *)UIApp applicationOpenURL:adjustedURL publicURLsOnly:NO];
 		} else if ([UIApp respondsToSelector:@selector(applicationOpenURL:publicURLsOnly:animating:sender:additionalActivationFlag:)]) {
@@ -223,6 +225,8 @@ __attribute__((visibility("hidden")))
 	if (BCURLPassesPrefilter(url)) {
 		if ([UIApp respondsToSelector:@selector(applicationOpenURL:publicURLsOnly:animating:sender:additionalActivationFlag:)]) {
 			[(SpringBoard *)UIApp applicationOpenURL:url publicURLsOnly:NO animating:YES sender:nil additionalActivationFlag:0];
+		} else if ([UIApp respondsToSelector: @selector(openURL:options:completionHandler:)]) {
+		    [UIApp openURL:url options:@{} completionHandler:nil];
 		} else {
 			[(SpringBoard *)UIApp applicationOpenURL:url withApplication:nil sender:nil publicURLsOnly:NO animating:YES needsPermission:NO additionalActivationFlags:nil];
 		}
@@ -341,6 +345,32 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 			return;
 	}
 }
+
+// iOS 12
+
+- (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating activationSettings:(id)activationSettings origin:(id)origin withResult:(id)resultHandler
+{
+	switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, origin, 0, activationSettings, resultHandler)) {
+		case BCNoMappingApplied:
+			return %orig();
+		case BCMappedToUIElement:
+			return;
+		case BCMappedToNewApplication:
+			suppressed++;
+			shouldBreadcrumb++;
+            if ([UIApp respondsToSelector: @selector(openURL:options:completionHandler:)]) {
+                [self openURL:url options:@{} completionHandler:nil];
+            } else {
+				NSLog(@"Error, openURLCore hook fell through");
+			}
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 10), dispatch_get_main_queue(), ^{
+				shouldBreadcrumb--;
+			});
+			suppressed--;
+			return;
+	}
+}
+
 
 %end
 
