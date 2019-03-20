@@ -4,3 +4,6 @@
 [submodule "AppList"]
 	path = AppList
 	url = git://github.com/rpetrich/AppList.git
+[submodule "preferenceloader"]
+	path = preferenceloader
+	url = git@github.com:rpetrich/preferenceloader
