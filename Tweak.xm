@@ -202,7 +202,6 @@ __attribute__((visibility("hidden")))
 
 @end
 
-
 %group SpringBoard
 
 %hook SBApplication
@@ -247,6 +246,7 @@ typedef enum {
 
 static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url, id *display, id sender, unsigned additionalActivationFlag, id objectAdditionalFlags, id activationHandler)
 {
+    NSLog(@"MADE IT TO APPLYMAPPING");
 	if (!suppressed && BCURLPassesPrefilter(*url)) {
 		NSString *displayIdentifier = BCActiveDisplayIdentifier();
 		if (displayIdentifier) {
@@ -277,12 +277,14 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 
 - (void)applicationOpenURL:(NSURL *)url publicURLsOnly:(BOOL)only animating:(BOOL)animating sender:(id)sender additionalActivationFlag:(unsigned)additionalActivationFlag
 {
+    NSLog(@"MADE IT TO APPOPENURL 5/6");
 	if (BCApplyMappingAndOptionallyConsumeURL(&url, NULL, sender, additionalActivationFlag, nil, nil) != BCNoMappingApplied)
 		%orig();
 }
 
 - (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating sender:(id)sender additionalActivationFlags:(id)flags
 {
+    NSLog(@"MADE IT TO OPENURLCORE 5/6");
 	if (BCApplyMappingAndOptionallyConsumeURL(&url, &display, sender, 0, flags, nil) != BCNoMappingApplied)
 		%orig();
 }
@@ -291,6 +293,7 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 
 - (void)_applicationOpenURL:(NSURL *)url withApplication:(id)display sender:(id)sender publicURLsOnly:(BOOL)publicOnly animating:(BOOL)animating additionalActivationFlags:(id)activationFlags activationHandler:(id)activationHandler
 {
+    NSLog(@"MADE IT TO APPOPENURL 7");
 	switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, sender, 0, activationFlags, activationHandler)) {
 		case BCNoMappingApplied:
 			return %orig();
@@ -306,6 +309,7 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 
 - (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating sender:(id)sender additionalActivationFlags:(id)activationFlags activationHandler:(id)activationHandler
 {
+    NSLog(@"MADE IT TO OPENURLCORE 7");
 	switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, sender, 0, activationFlags, activationHandler)) {
 		case BCNoMappingApplied:
 			return %orig();
@@ -323,6 +327,7 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 
 - (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating sender:(id)sender activationSettings:(id)activationSettings withResult:(id)resultHandler
 {
+    NSLog(@"MADE IT TO OPENURLCORE 8");
 	switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, sender, 0, activationSettings, resultHandler)) {
 		case BCNoMappingApplied:
 			return %orig();
@@ -350,6 +355,7 @@ static inline BCMappingApplied BCApplyMappingAndOptionallyConsumeURL(NSURL **url
 
 - (void)_openURLCore:(NSURL *)url display:(id)display animating:(BOOL)animating activationSettings:(id)activationSettings origin:(id)origin withResult:(id)resultHandler
 {
+    NSLog(@"MADE IT TO OPENURLCORE");
 	switch (BCApplyMappingAndOptionallyConsumeURL(&url, &display, origin, 0, activationSettings, resultHandler)) {
 		case BCNoMappingApplied:
 			return %orig();
